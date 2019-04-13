@@ -1,9 +1,11 @@
-﻿using System;
+﻿// version with ViewModel for Product and Categories
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using OrderSystem.Core.Models;
+using OrderSystem.Core.ViewModels;
 using OrderSystem.DataAccess.InMemory;
 
 namespace OrderSystem.WebUI.Controllers
@@ -11,10 +13,12 @@ namespace OrderSystem.WebUI.Controllers
     public class ProductManagerController : Controller
     {
         ProductRepository context;
+        ProductCategoryRepository productCategories;
 
         public ProductManagerController()
         {
-            context = new ProductRepository(); // initialize the repository
+            context = new ProductRepository(); // initialize the product repository
+            productCategories = new ProductCategoryRepository(); // initialize the product category repository
         }
         // GET: ProductManager
         public ActionResult Index() // page with current list of products. Index View is created from here
@@ -25,8 +29,12 @@ namespace OrderSystem.WebUI.Controllers
         }
         public ActionResult Create() // displays the page to fill in the details
         {
-            Product product = new Product();
-            return View(product);
+            ProductManagerViewModel viewModel = new ProductManagerViewModel();
+
+            viewModel.Product = new Product();
+            viewModel.ProductCategories = productCategories.Collection(); // list of categories that will be viewed via dropdown
+
+            return View(viewModel);
         }
         [HttpPost]
         public ActionResult Create(Product product) // post back the changes to be saved. Create View is created from here
@@ -52,7 +60,11 @@ namespace OrderSystem.WebUI.Controllers
             }
             else
             {
-                return View(product); // if found, return it to the View
+                ProductManagerViewModel viewModel = new ProductManagerViewModel();
+                viewModel.Product = product;
+                viewModel.ProductCategories = productCategories.Collection(); // list of categories that will be viewed via dropdown
+
+                return View(viewModel); // if found, return it to the View
             }
         }
         [HttpPost]
